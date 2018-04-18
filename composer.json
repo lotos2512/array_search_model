@@ -5,6 +5,7 @@
     "type": "yii2-extension",
     "keywords": ["yii2", "array-search", "active-record"],
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Andrey Golikov",
