@@ -6,7 +6,7 @@
  * Time: 15:50
  */
 
-namespace agolikov\array_search_model;
+namespace lotos2512\array_search_model;
 
 use Exception;
 use yii\helpers\ArrayHelper;
