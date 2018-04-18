@@ -1,4 +1,5 @@
 <?php
+
 namespace lotos2512\array_search_model;
 
 use Exception;
@@ -262,7 +263,7 @@ abstract class ArraySearchModel
                 return [];
             }
         }
-        foreach ($data  as $item) {
+        foreach ($data as $item) {
             if ($regexResult >= self::SEARCH_LIMIT) {
                 break;
             }
@@ -335,7 +336,7 @@ abstract class ArraySearchModel
     protected function regexFilter(array $item) : bool
     {
         $valuesByRegexCompare = [];
-        $regex = '%' . $this->regexFilter[2] . '(/|)*.*' . '%iu';
+        $regex = "%" . $this->regexFilter[2] . "(/|)*.*" . "%iu";
         $result = false;
         if (is_callable($this->regexFilter[1])) {
             $valuesByRegexCompare = (array) call_user_func($this->regexFilter[1], $item);
@@ -347,8 +348,13 @@ abstract class ArraySearchModel
             throw new Exception('Incorrect value for compare');
         }
         foreach ($valuesByRegexCompare as $itemByRegex) {
-            if (preg_match($regex, $itemByRegex)) {
-                $result = true;
+            try {
+                if (preg_match($regex, $itemByRegex)) {
+                    $result = true;
+                    break;
+                }
+
+            } catch (Exception $e) {
                 break;
             }
         }
