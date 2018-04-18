@@ -1,30 +1,13 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: andrey
- * Date: 16.04.18
- * Time: 15:50
- */
-
 namespace lotos2512\array_search_model;
 
 use Exception;
 use yii\helpers\ArrayHelper;
+
 /**
  * Class ArraySearchModel
  * @property ArrayDataProvider $dataProvider
  * @package app\components\array_search_models
- *
- *
- *      $data = ChildArraySearchModel::find()
-        ->where(['in', 'array_field', array])
-        ->where(['===', 'array_field_or_callback_with_result_can_be_array_or_array_value', equal_value])
-        ->where(['regex', callback_with_array_return, equal_value|equal_value|equal_value])
-        ->orderBy(callback_with_sort_function_result)
-        ->limit(int_value)
-        ->offset(int_value)
-        ->indexBy('array_field')
-        ->all();
  */
 abstract class ArraySearchModel
 {
@@ -109,7 +92,7 @@ abstract class ArraySearchModel
             $this->order = $order;
             return $this;
         }
-        throw new Exception('Не верный формат сортировки');
+        throw new Exception('Неверный формат сортировки');
     }
 
     /**
@@ -160,10 +143,10 @@ abstract class ArraySearchModel
             } elseif ($params[0] == self::WHERE_OPERATOR_REGEX) {
                 $this->regexFilter = $params;
             } else {
-                throw new Exception('Не верный оператор условия ' . $params[0]);
+                throw new Exception('Неверный оператор условия ' . $params[0]);
             }
         } else {
-            throw new Exception('Не верный формат условия');
+            throw new Exception('Неверный формат условия');
         }
         return $this;
     }
@@ -338,7 +321,7 @@ abstract class ArraySearchModel
                 $valuesByRegexCompare = [$item[$this->regexFilter[1]]];
             }
         } else {
-            throw new Exception('Не правильные данные');
+            throw new Exception('Неправильные данные');
         }
         foreach ($valuesByRegexCompare as $itemByRegex) {
             if (preg_match($regex, $itemByRegex)) {
