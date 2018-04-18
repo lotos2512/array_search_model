@@ -3,7 +3,7 @@
     "description": "search model by array",
     "homepage": "https://github.com/lotos2512/array_search_model",
     "type": "yii2-extension",
-    "keywords": ["yii2", "array-search", "active-record"],
+    "keywords": ["yii2", "array-search", "search data from array"],
     "license": "MIT",
     "minimum-stability": "stable",
     "authors": [
