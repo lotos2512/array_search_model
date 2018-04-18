@@ -1,7 +1,16 @@
 # array_search_model
 search model by array
 
-Base usage
+## Installation
+
+The preferred way to install this extension is through [composer](http://getcomposer.org/download/).
+
+Either run
+```
+php composer.phar require lotos2512/array_search_model dev-master
+
+```
+## Base usage
 
 ```php 
     $data = ChildArraySearchModel::find()
