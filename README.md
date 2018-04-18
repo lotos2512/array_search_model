@@ -1,7 +1,7 @@
 # array_search_model
 search model by array
 
-Base usege
+Base usage
 ```php 
 $data = ChildArraySearchModel::find()
   ->where(['in', 'array_field', array])
