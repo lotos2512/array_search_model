@@ -1,7 +1,9 @@
 {
     "name": "lotos2512/array_search_model",
     "description": "search model by array",
-    "type": "libraty",
+    "homepage": "https://github.com/lotos2512/array_search_model",
+    "type": "yii2-extension",
+    "keywords": ["yii2", "array-search", "active-record"],
     "license": "MIT",
     "authors": [
         {
@@ -17,5 +19,11 @@
     "require-dev": {
         "php": ">=7.2.0",
         "yiisoft/yii2": "^2.0.14",
+    },
+    "autoload": {
+        "classmap": ["array_search_model/array_search_model", "lotos2512/array_search_model/", "ArraySearchModel.php"],
+    },
+    "config": {
+        "optimize-autoloader": true
     },
 }
