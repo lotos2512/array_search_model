@@ -46,6 +46,9 @@ abstract class ArraySearchModel
         $this->dataProvider = $this->getDataProvider();
     }
 
+    /**
+     * @return ArraySearchModel
+     */
     final public static function find() : self
     {
         if (static::$selfObject === null) {
@@ -54,20 +57,35 @@ abstract class ArraySearchModel
         return static::$selfObject;
     }
 
+    /**
+     * @return ArrayDataProvider
+     */
     abstract public function getDataProvider() : ArrayDataProvider;
 
+    /**
+     * @param int $limit
+     * @return ArraySearchModel
+     */
     public function limit(int $limit = 0) : self
     {
         $this->limit = $limit;
         return $this;
     }
 
+    /**
+     * @param int $offset
+     * @return ArraySearchModel
+     */
     public function offset(int $offset = 0) : self
     {
         $this->offset = $offset;
         return $this;
     }
 
+    /**
+     * @param string $index
+     * @return ArraySearchModel
+     */
     public function indexBy(string $index) : self
     {
         $this->index = $index;
@@ -92,43 +110,42 @@ abstract class ArraySearchModel
             $this->order = $order;
             return $this;
         }
-        throw new Exception('Неверный формат сортировки');
+        throw new Exception('Invalid sorting format');
     }
 
     /**
      * @param array $params ['in', 'поле', [значения]
-     * 0 - оператор из массива getWhereOperators
-     * 1 значение из массива по которому будет сравнения может быть callback
-     * можно вернуть массив значений - можно использовать при вложенности.
-     * 2 - значение по которому будет сравнения
+     * 0 - operator from constant WHERE_OPERATOR_.*
+     * 1 value from array by compare.Can be callback function with result
+     * 2 - value by compare
      *
      * $params = [
-        'regex',
-        function ($ticker) {
-            return [
-                $ticker['title'],
-                $ticker['beauty_title'],
-                @$ticker['company']['title'],
-                $ticker['beauty_company_name'],
-            ];
-        },
-        'TGHE',
-    ];
+     *   'regex',
+     *   function ($ticker) {
+     *       return [
+     *           $ticker['title'],
+     *           $ticker['beauty_title'],
+     *           @$ticker['company']['title'],
+     *           $ticker['beauty_company_name'],
+     *       ];
+     *   },
+     *   'TGHE',
+     * ];
      * $params = [
-        'regex',
-        'какой-то ключ массива'
-        'TGHE',
-    ]
-     * * $params = [
-        'in',
-        'какой-то ключ массива'
-        array| callable,
-    ];
+     *   'regex',
+     *   'key_from_array'
+     *   'value_by_compare',
+     * ];
      * $params = [
-        '===',
-        'type',
-        'share'
-    ];
+     *   'in',
+     *   'key_from_array_by_compare'
+     *   array| callable,
+     * ];
+     * $params = [
+     *   '===',
+     *   'type',
+     *   'share'
+     * ];
      *
      * @return static
      * @throws Exception
@@ -143,14 +160,17 @@ abstract class ArraySearchModel
             } elseif ($params[0] == self::WHERE_OPERATOR_REGEX) {
                 $this->regexFilter = $params;
             } else {
-                throw new Exception('Неверный оператор условия ' . $params[0]);
+                throw new Exception('Invalid condition statement ' . $params[0]);
             }
         } else {
-            throw new Exception('Неверный формат условия');
+            throw new Exception('Invalid condition format');
         }
         return $this;
     }
 
+    /**
+     * @return array
+     */
     private function getCommonOperators() : array
     {
         return [
@@ -165,6 +185,9 @@ abstract class ArraySearchModel
         ];
     }
 
+    /**
+     * @return array
+     */
     private function getSpecialOperators() : array
     {
         return [
@@ -321,7 +344,7 @@ abstract class ArraySearchModel
                 $valuesByRegexCompare = [$item[$this->regexFilter[1]]];
             }
         } else {
-            throw new Exception('Неправильные данные');
+            throw new Exception('Incorrect value for compare');
         }
         foreach ($valuesByRegexCompare as $itemByRegex) {
             if (preg_match($regex, $itemByRegex)) {
