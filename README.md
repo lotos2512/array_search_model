@@ -1,5 +1,6 @@
-# array_search_model
-search model by array
+# ArraySearchModel
+
+This library by search data from array
 
 ## Installation
 
