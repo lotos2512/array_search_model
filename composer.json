@@ -14,16 +14,16 @@
     "minimum-stability": "beta",
     "require": {
         "php": ">=7.2.0",
-        "yiisoft/yii2": "^2.0.14",
+        "yiisoft/yii2": "^2.0.14"
     },
     "require-dev": {
         "php": ">=7.2.0",
-        "yiisoft/yii2": "^2.0.14",
+        "yiisoft/yii2": "^2.0.14"
     },
     "autoload": {
         "classmap": ["array_search_model/array_search_model", "lotos2512/array_search_model/", "ArraySearchModel.php"],
     },
     "config": {
         "optimize-autoloader": true
-    },
+    }
 }
