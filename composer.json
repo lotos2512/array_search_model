@@ -1,0 +1,21 @@
+{
+    "name": "lotos2512/array_search_model",
+    "description": "search model by array",
+    "type": "libraty",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrey Golikov",
+            "email": "lotos2512@mail.ru"
+        }
+    ],
+    "minimum-stability": "beta",
+    "require": {
+        "php": ">=7.2.0",
+        "yiisoft/yii2": "^2.0.14",
+    },
+    "require-dev": {
+        "php": ">=7.2.0",
+        "yiisoft/yii2": "^2.0.14",
+    },
+}
