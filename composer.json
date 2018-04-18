@@ -5,7 +5,7 @@
     "type": "yii2-extension",
     "keywords": ["yii2", "array-search", "active-record"],
     "license": "MIT",
-    "minimum-stability": "dev",
+    "minimum-stability": "dev-master",
     "authors": [
         {
             "name": "Andrey Golikov",
@@ -23,7 +23,7 @@
     },
     "autoload": {
         "psr-4": {
-            "lotos2512\\array_search_model\\": "lotos2512\\array_search_model\\"
+            "lotos2512\\": "src/"
         }
     },
     "config": {
