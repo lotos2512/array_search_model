@@ -67,7 +67,7 @@ abstract class ArraySearchModel
      * @param int $limit
      * @return ArraySearchModel
      */
-    public function limit(int $limit = 0) : self
+    public function limit(int $limit) : self
     {
         $this->limit = $limit;
         return $this;
@@ -77,7 +77,7 @@ abstract class ArraySearchModel
      * @param int $offset
      * @return ArraySearchModel
      */
-    public function offset(int $offset = 0) : self
+    public function offset(int $offset) : self
     {
         $this->offset = $offset;
         return $this;
