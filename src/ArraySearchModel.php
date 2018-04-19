@@ -283,7 +283,7 @@ abstract class ArraySearchModel
                     break;
                 }
             }
-            if ($this->regexFilter !== null) {
+            if ($this->regexFilter !== null && $resultItem === true) {
                 if ($this->regexFilter($item) === false) {
                     $resultItem = false;
                 } else {
