@@ -34,6 +34,7 @@ abstract class ArraySearchModel
     private $offset;
     private $order;
     private $dataProvider;
+    private $customFilter;
     protected static $selfObject;
 
 
@@ -202,8 +203,12 @@ abstract class ArraySearchModel
      */
     public function all() : ?array
     {
+        $data = $this->runOrder($this->whereFilter($this->dataProvider->getData()));
+        if ($this->customFilter !== null) {
+            $data = call_user_func($this->customFilter, $data);
+        }
         $result = array_slice(
-            $this->runOrder($this->whereFilter($this->dataProvider->getData())),
+            $data,
             $this->offset,
             $this->limit
         );
@@ -212,6 +217,11 @@ abstract class ArraySearchModel
             : ArrayHelper::index($result, function ($element) {
                 return $element[$this->index];
             });
+    }
+
+    public function customFilter(callable $function) : void
+    {
+        $this->customFilter = $function;
     }
 
     private function runOrder(array $data) : array
