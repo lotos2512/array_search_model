@@ -12,17 +12,17 @@ use yii\helpers\ArrayHelper;
  */
 abstract class ArraySearchModel
 {
-    const WHERE_OPERATOR_IN = 'in';
-    const WHERE_OPERATOR_EQUALLY = '==';
+    private const WHERE_OPERATOR_IN = 'in';
+    private const WHERE_OPERATOR_EQUALLY = '==';
 
-    const WHERE_OPERATOR_REGEX = 'regex';
-    const WHERE_OPERATOR_HARD_EQUALLY = '===';
-    const WHERE_OPERATOR_HARD_NOT_EQUALLY = '!==';
-    const WHERE_OPERATOR_NOT_EQUALLY = '!=';
-    const WHERE_OPERATOR_MORE_OR_EQUALLY = '>=';
-    const WHERE_OPERATOR_LESS_OR_EQUALLY = '<=';
-    const WHERE_OPERATOR_LESS = '<';
-    const WHERE_OPERATOR_MORE = '>';
+    private const WHERE_OPERATOR_REGEX = 'regex';
+    private const WHERE_OPERATOR_HARD_EQUALLY = '===';
+    private const WHERE_OPERATOR_HARD_NOT_EQUALLY = '!==';
+    private const WHERE_OPERATOR_NOT_EQUALLY = '!=';
+    private const WHERE_OPERATOR_MORE_OR_EQUALLY = '>=';
+    private const WHERE_OPERATOR_LESS_OR_EQUALLY = '<=';
+    private const WHERE_OPERATOR_LESS = '<';
+    private const WHERE_OPERATOR_MORE = '>';
     public const ORDER_ASK = 'asc';
     public const ORDER_DESK = 'desk';
     private $commonWhere = [];
