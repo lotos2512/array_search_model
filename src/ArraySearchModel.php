@@ -12,7 +12,6 @@ use yii\helpers\ArrayHelper;
  */
 abstract class ArraySearchModel
 {
-    const SEARCH_LIMIT = 20;
     const WHERE_OPERATOR_IN = 'in';
     const WHERE_OPERATOR_EQUALLY = '==';
 
@@ -40,12 +39,13 @@ abstract class ArraySearchModel
 
     final public function __construct()
     {
+        $this->dataProvider = $this->getDataProvider();
         $this->init();
     }
 
     protected function init() : void
     {
-        $this->dataProvider = $this->getDataProvider();
+
     }
 
     /**
@@ -266,18 +266,8 @@ abstract class ArraySearchModel
      */
     private function commonFilterData($data) : array
     {
-        $regexResult = 0;
-        $result = [];
-        if ($this->regexFilter !== null) {
-            if (mb_strlen($this->regexFilter[2]) < 2) {
-                return [];
-            }
-        }
-        foreach ($data as $item) {
-            if ($regexResult >= self::SEARCH_LIMIT) {
-                break;
-            }
-            $resultItem = true;
+        $result = array_filter($data, function ($item) {
+            $result = true;
             foreach ($this->commonWhere as $commonCondition) {
                 $condition = $commonCondition[0];
                 $itemVal = $commonCondition[1];
@@ -289,21 +279,17 @@ abstract class ArraySearchModel
                     $itemValue = call_user_func($itemVal, $item);
                 }
                 if ($this->checkValByCommonFilter($itemValue, $conditionValue, $condition) === false) {
-                    $resultItem = false;
+                    $result = false;
                     break;
                 }
             }
-            if ($this->regexFilter !== null && $resultItem === true) {
+            if ($this->regexFilter !== null && $result === true) {
                 if ($this->regexFilter($item) === false) {
-                    $resultItem = false;
-                } else {
-                    $regexResult++;
+                    $result = false;
                 }
             }
-            if ($resultItem === true) {
-                $result[] = $item;
-            }
-        }
+            return $result;
+        });
         return $result;
     }
 
