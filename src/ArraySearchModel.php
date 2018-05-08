@@ -23,11 +23,19 @@ abstract class ArraySearchModel
     const WHERE_OPERATOR_LESS_OR_EQUALLY = '<=';
     const WHERE_OPERATOR_LESS = '<';
     const WHERE_OPERATOR_MORE = '>';
+
     public const ORDER_ASK = 'asc';
     public const ORDER_DESK = 'desk';
-    private $commonWhere = [];
-    private $specialWhere = [];
+
+    private $conditions = [];
+    private $maxConditionIndex;
+
+    const CONDITION_TYPE_COMMON = 'common';
+    const CONDITION_TYPE_SPECIAL = 'special';
+    const CONDITION_TYPE_REGEX = 'regex';
+
     private $regexFilter;
+
     private $limit;
     private $index;
     private $offset;
@@ -150,20 +158,89 @@ abstract class ArraySearchModel
     public function where(array $params) : self
     {
         if (count($params) === 3) {
-            if (in_array($params[0], $this->getCommonOperators())) {
-                $this->commonWhere[] = $params;
-            } elseif (in_array($params[0], $this->getSpecialOperators())) {
-                $this->specialWhere[] = $params;
-            } elseif ($params[0] == self::WHERE_OPERATOR_REGEX) {
+            $conditionType = $this->getConditionType($params[0]);
+            if ($conditionType === self::CONDITION_TYPE_REGEX) {
                 $this->regexFilter = $params;
+                return $this;
+            }
+            if ($this->maxConditionIndex === null) {
+                $this->conditions[][$conditionType][] = $params;
+                $this->maxConditionIndex = 0;
             } else {
-                throw new Exception('Invalid condition statement ' . $params[0]);
+                $condition = $this->conditions;
+                $condition[$this->maxConditionIndex][$conditionType][] = $params;
+                $this->conditions = $condition;
             }
         } else {
             throw new Exception('Invalid condition format');
         }
         return $this;
     }
+
+    /**
+     * @param array $params
+     * @return ArraySearchModel
+     * @throws Exception
+     */
+    public function orWhere(array $params) : self
+    {
+        if (count($params) === 3) {
+            $conditionType = $this->getConditionType($params[0]);
+            if ($conditionType === self::CONDITION_TYPE_REGEX) {
+                $this->regexFilter = $params;
+                return $this;
+            }
+            if ($this->maxConditionIndex === null) {
+                $this->conditions[][$conditionType][] = $params;
+                $this->maxConditionIndex = 0;
+            } else {
+                $this->maxConditionIndex++;
+                $condition = $this->conditions;
+                $condition[$this->maxConditionIndex][$conditionType][] = $params;
+                $this->conditions = $condition;
+            }
+        } else {
+            throw new Exception('Invalid condition format');
+        }
+        return $this;
+    }
+
+    /**
+     * @param string $type
+     * @return string
+     * @throws Exception
+     */
+    protected function getConditionType(string $type) : string
+    {
+        if(in_array($type, $this->getCommonOperators())) {
+            return self::CONDITION_TYPE_COMMON;
+        } elseif (in_array($type, $this->getSpecialOperators())) {
+            return self::CONDITION_TYPE_SPECIAL;
+        } elseif ($type === self::WHERE_OPERATOR_REGEX) {
+            return self::CONDITION_TYPE_REGEX;
+        }
+        throw new Exception('Invalid condition statement ' .$type);
+    }
+
+
+
+
+    public function getAllOperators() : array
+    {
+        return [
+            self::WHERE_OPERATOR_EQUALLY,
+            self::WHERE_OPERATOR_HARD_EQUALLY,
+            self::WHERE_OPERATOR_HARD_NOT_EQUALLY,
+            self::WHERE_OPERATOR_NOT_EQUALLY,
+            self::WHERE_OPERATOR_MORE_OR_EQUALLY,
+            self::WHERE_OPERATOR_LESS_OR_EQUALLY,
+            self::WHERE_OPERATOR_LESS,
+            self::WHERE_OPERATOR_MORE,
+            self::WHERE_OPERATOR_IN,
+            self::WHERE_OPERATOR_REGEX,
+        ];
+    }
+
 
     /**
      * @return array
@@ -235,35 +312,55 @@ abstract class ArraySearchModel
      */
     protected function whereFilter(array $data) : array
     {
-        foreach ($this->specialWhere as $condition) {
-            $data = $this->specialFilterData($data, $condition[0], $condition[1], $condition[2]);
+        $result = [];
+        foreach ($this->conditions as $key => $conditions) {
+            $result = array_merge($result, $this->filterData($data, $conditions));
         }
-        if (count($this->commonWhere)) {
-            $data = $this->commonFilterData($data);
+        return $result;
+    }
+
+    private function filterData(array $data,array $conditions) : array
+    {
+        foreach ($conditions as $conditionType => $condition) {
+            if ($conditionType === self::CONDITION_TYPE_COMMON) {
+                $data = $this->commonFilterData($data, $condition);
+            } elseif ($conditionType === self::CONDITION_TYPE_SPECIAL) {
+                $data = $this->specialFilterData($data, $condition);
+            }
         }
         return $data;
     }
 
-    private function specialFilterData(array $data, string $operator, string $field, $filterValue) : array
+
+
+
+    private function specialFilterData(array $data, array $conditions) : array
     {
-        switch ($operator) {
-            case  self::WHERE_OPERATOR_IN :
-                return array_intersect_key($data, array_intersect(array_column($data, $field), $filterValue));
-            default :
-                return $data;
+        $result = [];
+        foreach ($conditions as $condition) {
+            $operator = $condition[0];
+            $field = $condition[1];
+            $filterValue = $condition[2];
+            switch ($operator) {
+                case  self::WHERE_OPERATOR_IN :
+                    $filterResult = array_intersect_key($data, array_intersect(array_column($data, $field), $filterValue));
+                    $result = array_merge($result, $filterResult) ;
+                default :
+            }
         }
+        return $result;
     }
 
     /**
      * @param $data
+     * @param array $conditions
      * @return array
-     * @throws Exception
      */
-    private function commonFilterData($data) : array
+    private function commonFilterData($data, array $conditions) : array
     {
-        $result = array_filter($data, function ($item) {
+        $result = array_filter($data, function ($item) use ($conditions) {
             $result = true;
-            foreach ($this->commonWhere as $commonCondition) {
+            foreach ($conditions as $commonCondition) {
                 $condition = $commonCondition[0];
                 $itemVal = $commonCondition[1];
                 $conditionValue = $commonCondition[2];
