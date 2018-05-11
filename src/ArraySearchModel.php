@@ -385,7 +385,7 @@ abstract class ArraySearchModel
                     break;
                 }
             }
-            if (isset($this->regexConditions[$whereGroupIndex]) && $result === true) {
+            if (array_key_exists($whereGroupIndex, $this->regexConditions) && $result === true) {
                 if ($this->regexFilter($item, $this->regexConditions[$whereGroupIndex]) === false) {
                     $result = false;
                 }
