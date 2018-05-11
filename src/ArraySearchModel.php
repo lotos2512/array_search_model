@@ -30,11 +30,12 @@ abstract class ArraySearchModel
     private $conditions = [];
     private $maxConditionIndex;
 
+    private $regexConditions = [];
+
     const CONDITION_TYPE_COMMON = 'common';
     const CONDITION_TYPE_SPECIAL = 'special';
-    const CONDITION_TYPE_REGEX = 'regex';
 
-    private $regexFilter;
+    const CONDITION_TYPE_REGEX = 'regex';
 
     private $limit;
     private $index;
@@ -159,14 +160,18 @@ abstract class ArraySearchModel
     {
         if (count($params) === 3) {
             $conditionType = $this->getConditionType($params[0]);
-            if ($conditionType === self::CONDITION_TYPE_REGEX) {
-                $this->regexFilter = $params;
-                return $this;
-            }
             if ($this->maxConditionIndex === null) {
-                $this->conditions[][$conditionType][] = $params;
                 $this->maxConditionIndex = 0;
+                if ($conditionType === self::CONDITION_TYPE_REGEX) {
+                    $this->regexConditions[$this->maxConditionIndex] = $params;
+                    return $this;
+                }
+                $this->conditions[][$conditionType][] = $params;
             } else {
+                if ($conditionType === self::CONDITION_TYPE_REGEX) {
+                    $this->regexConditions[$this->maxConditionIndex] = $params;
+                    return $this;
+                }
                 $condition = $this->conditions;
                 $condition[$this->maxConditionIndex][$conditionType][] = $params;
                 $this->conditions = $condition;
@@ -186,15 +191,19 @@ abstract class ArraySearchModel
     {
         if (count($params) === 3) {
             $conditionType = $this->getConditionType($params[0]);
-            if ($conditionType === self::CONDITION_TYPE_REGEX) {
-                $this->regexFilter = $params;
-                return $this;
-            }
             if ($this->maxConditionIndex === null) {
-                $this->conditions[][$conditionType][] = $params;
                 $this->maxConditionIndex = 0;
+                if ($conditionType === self::CONDITION_TYPE_REGEX) {
+                    $this->regexConditions[$this->maxConditionIndex] = $params;
+                    return $this;
+                }
+                $this->conditions[][$conditionType][] = $params;
             } else {
                 $this->maxConditionIndex++;
+                if ($conditionType === self::CONDITION_TYPE_REGEX) {
+                    $this->regexConditions[$this->maxConditionIndex] = $params;
+                    return $this;
+                }
                 $condition = $this->conditions;
                 $condition[$this->maxConditionIndex][$conditionType][] = $params;
                 $this->conditions = $condition;
@@ -314,16 +323,16 @@ abstract class ArraySearchModel
     {
         $result = [];
         foreach ($this->conditions as $key => $conditions) {
-            $result = array_merge($result, $this->filterData($data, $conditions));
+            $result = array_merge($result, $this->filterData($data, $conditions, $key));
         }
         return $result;
     }
 
-    private function filterData(array $data,array $conditions) : array
+    private function filterData(array $data, array $conditions, int $whereGroupIndex) : array
     {
         foreach ($conditions as $conditionType => $condition) {
             if ($conditionType === self::CONDITION_TYPE_COMMON) {
-                $data = $this->commonFilterData($data, $condition);
+                $data = $this->commonFilterData($data, $condition, $whereGroupIndex);
             } elseif ($conditionType === self::CONDITION_TYPE_SPECIAL) {
                 $data = $this->specialFilterData($data, $condition);
             }
@@ -354,11 +363,12 @@ abstract class ArraySearchModel
     /**
      * @param $data
      * @param array $conditions
+     * @param int $whereGroupIndex
      * @return array
      */
-    private function commonFilterData($data, array $conditions) : array
+    private function commonFilterData($data, array $conditions, int $whereGroupIndex) : array
     {
-        $result = array_filter($data, function ($item) use ($conditions) {
+        $result = array_filter($data, function ($item) use ($conditions, $whereGroupIndex) {
             $result = true;
             foreach ($conditions as $commonCondition) {
                 $condition = $commonCondition[0];
@@ -375,8 +385,8 @@ abstract class ArraySearchModel
                     break;
                 }
             }
-            if ($this->regexFilter !== null && $result === true) {
-                if ($this->regexFilter($item) === false) {
+            if (isset($this->regexConditions[$whereGroupIndex]) && $result === true) {
+                if ($this->regexFilter($item, $this->regexConditions[$whereGroupIndex]) === false) {
                     $result = false;
                 }
             }
@@ -421,16 +431,16 @@ abstract class ArraySearchModel
      * @return bool
      * @throws Exception
      */
-    protected function regexFilter(array $item) : bool
+    protected function regexFilter(array $item, array $regexCondition) : bool
     {
         $valuesByRegexCompare = [];
-        $regex = "%" . $this->regexFilter[2] . "(/|)*.*" . "%iu";
+        $regex = "%" . $regexCondition[2] . "(/|)*.*" . "%iu";
         $result = false;
-        if (is_callable($this->regexFilter[1])) {
-            $valuesByRegexCompare = (array) call_user_func($this->regexFilter[1], $item);
-        } elseif (is_string($this->regexFilter[1])) {
-            if (isset($item[$this->regexFilter[1]])) {
-                $valuesByRegexCompare = [$item[$this->regexFilter[1]]];
+        if (is_callable($regexCondition[1])) {
+            $valuesByRegexCompare = (array) call_user_func($regexCondition[1], $item);
+        } elseif (is_string($regexCondition[1])) {
+            if (isset($item[$regexCondition[1]])) {
+                $valuesByRegexCompare = [$item[$regexCondition[1]]];
             }
         } else {
             throw new Exception('Incorrect value for compare');
